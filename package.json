@@ -1,0 +1,35 @@
+{
+  "name": "rest",
+  "version": "1.0.0",
+  "description": "\"Demo API\"",
+  "type": "module",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon app.js && livereload"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shrionit/rest_api.git"
+  },
+  "author": "shri",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/shrionit/rest_api/issues"
+  },
+  "homepage": "https://github.com/shrionit/rest_api#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "connect-multiparty": "^2.2.0",
+    "crypto": "^1.0.1",
+    "express": "^4.17.1",
+    "express-jwt": "^6.0.0",
+    "express-validator": "^6.6.0",
+    "jwks-rsa": "^1.8.1",
+    "multer": "^1.4.2",
+    "nodemon": "^2.0.4",
+    "sqlite3": "^5.0.0"
+  },
+  "devDependencies": {
+    "morgan": "^1.10.0"
+  }
+}
