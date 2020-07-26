@@ -126,6 +126,7 @@ route.get("/:KEY/:SUBID", (req, res) => {
     });
 });
 
+//FOR SUBMITTING A SUBMISSION FOR A TASK
 route.post(
   "/submit/:KEY/:TASKID",
   upload.array(["attachments"]),
@@ -232,6 +233,7 @@ route2.get("/:KEY/:TASKID/:SUBID", (req, res) => {
     });
 });
 
+//FOR INSTRUCTOR TO GRADE A SUBMISSUIB WITH SUBID
 route2.put("/:KEY/:TASKID/:SUBID", (req, res) => {
   var details = {
     key: req.params.KEY,

@@ -95,7 +95,7 @@ users.get("/instructors/:ID", (req, res) => {
     tutor: true,
   };
   if (checkInt(req.params.ID)) {
-    filter.ID = req.params.ID;
+    filter.id = req.params.ID;
   } else {
     filter.username = req.params.ID;
   }

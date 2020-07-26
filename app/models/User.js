@@ -22,8 +22,8 @@ class User {
     password = null,
     email = null,
     created_on = null,
+    tasks = null,
     submissions = null,
-    stats = null,
     istutor = false,
   } = {}) {
     if (connection) User.conn = connection;
@@ -34,11 +34,10 @@ class User {
     this.#password = password;
     this.email = email;
     this.date = created_on;
-    this.submissions = submissions;
     if (istutor) {
       this.tasks = tasks;
     } else {
-      this.stats = stats;
+      this.submissions = submissions;
     }
     this._getCount();
   }
@@ -76,10 +75,7 @@ class User {
             }
             row.created_on = new Date(row.created_on).toISOString();
             if (tutor) {
-              SQL =
-                'SELECT * FROM VIEW_SUBMISSIONS WHERE FOR="' +
-                row.username +
-                '"';
+              SQL = 'SELECT * FROM tasks WHERE created_by="' + row.id + '"';
             } else {
               SQL =
                 'SELECT * FROM VIEW_SUBMISSIONS WHERE BY="' +
@@ -87,8 +83,13 @@ class User {
                 '"';
             }
             db.all(SQL, [], (e, r) => {
-              row.submissions = [] || r;
-              row.stats = [];
+              console.log(r);
+              if (tutor) {
+                row.tasks = r;
+              } else {
+                row.submissions = r;
+              }
+              row.istutor = tutor;
               resolve({
                 Status: "Success",
                 User: new User(row),

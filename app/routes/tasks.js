@@ -180,7 +180,7 @@ route.delete("/delete/:KEY/:TASKID", (req, res) => {
         }
       }
       res.json({
-        success: msg.success,
+        status: msg.success,
         deleted: msg.deleted,
       });
     })
