@@ -4,7 +4,6 @@ import jwks from "jwks-rsa";
 import DB from "../db.js";
 import Task from "../models/Task.js";
 import path from "path";
-import bodyParser from "body-parser";
 import multer from "multer";
 import ENIGMA from "../enigma.js";
 import fs from "fs";
@@ -49,7 +48,7 @@ const storage = multer.diskStorage({
     var name = "";
     ENIGMA.genkey(req.params.KEY, fname)
       .then((k) => {
-        name = k + "_" + fname + "_." + ext;
+        name = k + "_" + fname + "_" + Date.now() + "." + ext;
         callback(null, name);
       })
       .catch((err) => {
@@ -64,17 +63,44 @@ const upload = multer({
 
 const route = express.Router();
 route.use(jwtCheck);
-route.get("/:TASKID", (req, res) => {
-  Task.get({ id: req.params.TASKID })
+
+route.get("/:KEY", (req, res) => {
+  Task.get({ created_by: req.params.KEY })
     .then((task) => {
-      var files = [];
-      if (task.attachments != "") {
-        for (var file of task.attachments.split(",")) {
-          files.push("http://" + req.hostname + ":" + port + file);
+      for (var t of task) {
+        var files = [];
+        if (t.attachments != "") {
+          for (var file of t.attachments.split(",")) {
+            files.push("http://" + req.hostname + ":" + port + file);
+          }
         }
+        t.attachments = files;
       }
-      task.attachments = files;
-      res.json(task);
+      res.json({
+        status: "Success",
+        tasks: task,
+      });
+    })
+    .catch((err) => {
+      res.json(err);
+    });
+});
+route.get("/:KEY/:TASKID", (req, res) => {
+  Task.get({ id: req.params.TASKID, created_by: req.params.KEY })
+    .then((task) => {
+      for (var t of task) {
+        var files = [];
+        if (t.attachments != "") {
+          for (var file of t.attachments.split(",")) {
+            files.push("http://" + req.hostname + ":" + port + file);
+          }
+        }
+        t.attachments = files;
+      }
+      res.json({
+        status: "Success",
+        task: task,
+      });
     })
     .catch((err) => {
       res.json(err);
@@ -91,6 +117,13 @@ route.post("/create/:KEY", upload.array(["attachments"]), (req, res) => {
   taskdata.attachments = files.join(",");
   Task.create(taskdata)
     .then((task) => {
+      var files = [];
+      if (task.task.attachments != "") {
+        for (var file of task.task.attachments.split(",")) {
+          files.push("http://" + req.hostname + ":" + port + file);
+        }
+      }
+      task.task.attachments = files;
       res.json(task);
     })
     .catch((err) => {
@@ -120,6 +153,12 @@ route.patch(
           files.push("http://" + req.hostname + ":" + port + file);
         }
         task.task.attachments = files;
+        for (var file of task.tobedeleted) {
+          file = path.resolve(file.replace("/uploads/img", assetspath));
+          if (fs.existsSync(file)) {
+            fs.unlinkSync(file);
+          }
+        }
         res.json(task);
       })
       .catch((err) => {
@@ -150,4 +189,54 @@ route.delete("/delete/:KEY/:TASKID", (req, res) => {
     });
 });
 
-export default route;
+const route2 = express.Router();
+route2.use(jwtCheck);
+
+route2.get("/:KEY", (req, res) => {
+  Task.get({ key: req.params.KEY, student: true })
+    .then((task) => {
+      console.log(task);
+      for (var t of task) {
+        var files = [];
+        if (t.attachments != "") {
+          for (var file of t.attachments.split(",")) {
+            files.push("http://" + req.hostname + ":" + port + file);
+          }
+        }
+        t.attachments = files;
+      }
+      res.json({
+        status: "Success",
+        tasks: task,
+      });
+    })
+    .catch((err) => {
+      res.json(err);
+    });
+});
+route2.get("/:KEY/:TASKID", (req, res) => {
+  Task.get({ id: req.params.TASKID, key: req.params.KEY, student: true })
+    .then((task) => {
+      for (var t of task) {
+        var files = [];
+        if (t.attachments != "") {
+          for (var file of t.attachments.split(",")) {
+            files.push("http://" + req.hostname + ":" + port + file);
+          }
+        }
+        t.attachments = files;
+      }
+      res.json({
+        status: "Success",
+        task: task,
+      });
+    })
+    .catch((err) => {
+      res.json(err);
+    });
+});
+
+export default {
+  r1: route,
+  r2: route2,
+};

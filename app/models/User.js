@@ -191,7 +191,6 @@ class User {
     return new Promise((resolve, reject) => {
       User.conn.then((db) => {
         db.get(SQL, [], (err, row) => {
-          console.log(err, row);
           if (err) {
             data.user = err.message;
             reject(data);

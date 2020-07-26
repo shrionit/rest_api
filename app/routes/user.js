@@ -5,8 +5,12 @@ import DB from "../db.js";
 import User from "../models/User.js";
 import path from "path";
 import bodyParser from "body-parser";
-import tasks from "./tasks.js";
+import task from "./tasks.js";
+import submission from "./submission.js";
+import statsroute from "./stats.js";
 
+var [tasks, taskview] = Object.values(task);
+var [studentsub, instructorsub] = Object.values(submission);
 const __dirname = path.resolve();
 const DBSOURCE = path.resolve(__dirname, "./db.sqlite3");
 
@@ -104,6 +108,8 @@ users.get("/instructors/:ID", (req, res) => {
     });
 });
 
+/* ===================================================================*/
+
 //Individual Users
 const user = express.Router();
 user.use(bodyParser.json());
@@ -135,8 +141,20 @@ user.post("/create", (req, res) => {
     });
 });
 
-//tasks route
-user.use("/task", tasks);
+//tasks route for instructors
+user.use("/instructor/task", tasks);
+
+//tasks route for students
+user.use("/tasks", taskview);
+
+//submissions route for instructors
+user.use("/instructor/submissions", instructorsub);
+
+//tasks route for students
+user.use("/submission", studentsub);
+
+//stas route for studens
+user.use("/stats", statsroute);
 
 export default {
   usersRoute: users,

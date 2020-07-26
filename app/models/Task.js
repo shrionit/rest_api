@@ -40,52 +40,102 @@ class Task {
   }
 
   static get(taskdata) {
-    var SQL = "SELECT * FROM tasks";
-    var checks = [];
-    if (Object.keys(taskdata).length > 0) {
-      for (var key in taskdata) {
-        if (taskdata[key] && taskdata[key] != "") {
-          if (checkInt(taskdata[key])) {
-            checks.push(`${key}=${taskdata[key]}`);
-          } else {
-            checks.push(`${key}='${taskdata[key]}'`);
+    var SQL =
+      "SELECT id, title, description, attachments, status, (SELECT name FROM teachers WHERE id=created_by) as instructor, created_on FROM tasks";
+    if (taskdata.student) {
+      if (checkInt(`${taskdata.id}`)) {
+        SQL += " WHERE id=" + taskdata.id;
+      }
+      return new Promise((resolve, reject) => {
+        Task.conn.then((db) => {
+          db.get(
+            "SELECT id, username FROM students WHERE key=?",
+            [taskdata.key],
+            (e, r) => {
+              if (e) reject({ error: e.message });
+              if (r) {
+                db.all(SQL, [], (err, rows) => {
+                  console.log(err, rows);
+                  if (err) reject({ error: err.message });
+                  if (rows && rows.length > 0) {
+                    resolve(rows);
+                  } else {
+                    reject({
+                      error: "Invalid TASKID",
+                    });
+                  }
+                });
+              } else {
+                reject({
+                  error: "Invalid key",
+                  key: taskdata.key,
+                });
+              }
+            }
+          );
+        });
+      });
+    } else {
+      SQL = "SELECT * FROM tasks";
+      var checks = [];
+      if (Object.keys(taskdata).length > 0) {
+        for (var key in taskdata) {
+          if (taskdata[key] && taskdata[key] != "") {
+            checks.push(`${key}=?`);
           }
         }
       }
-    }
-    console.log(checks);
-    if (checks.length > 0) {
-      SQL += " WHERE ";
-      SQL += checks.join(" and ");
-    }
-
-    return new Promise((resolve, reject) => {
-      Task.conn.then((db) => {
-        db.all(SQL, [], (err, rows) => {
-          if (err) reject(err.message);
-          else {
-            if (rows.length == 1) {
-              rows = rows[0];
-              User.get({ id: rows.created_by }).then((user) => {
-                rows.created_by = user.username;
-                resolve(rows);
-              });
-            } else if (rows.length > 1) {
-              User.get({ id: rows[0].created_by }).then((user) => {
-                for (var r of rows) {
-                  r.created_by = user.username;
-                }
-                resolve(rows);
-              });
-            } else {
-              reject({
-                error: "No data found",
-              });
+      if (checks.length > 0) {
+        SQL += " WHERE ";
+        SQL += checks.join(" and ");
+      }
+      return new Promise((resolve, reject) => {
+        Task.conn.then((db) => {
+          db.get(
+            "SELECT id, username FROM teachers WHERE key=?",
+            [taskdata.created_by],
+            (e, r) => {
+              if (e) {
+                reject({
+                  error: "Invalid key",
+                  key: taskdata.created_by,
+                });
+              }
+              if (r) {
+                taskdata.created_by = r.id;
+                db.all(SQL, Object.values(taskdata), (err, rows) => {
+                  if (err)
+                    reject({
+                      error: err.message,
+                    });
+                  else {
+                    if (rows.length == 1) {
+                      rows = rows[0];
+                      rows.created_by = r.username;
+                      resolve([rows]);
+                    } else if (rows.length > 1) {
+                      for (var rw of rows) {
+                        rw.created_by = r.username;
+                      }
+                      resolve(rows);
+                    } else {
+                      reject({
+                        error: "No data found",
+                      });
+                    }
+                  }
+                });
+              } else {
+                reject({
+                  error: "Invalid key",
+                  key: taskdata.created_by,
+                });
+              }
             }
-          }
+          );
         });
       });
-    });
+    }
   }
 
   static create(taskdata) {
@@ -167,13 +217,12 @@ class Task {
             if (rr) {
               taskdata.created_by = rr.id;
               db.get(
-                "SELECT count(id) as COUNT FROM tasks WHERE id=? and created_by=?",
+                "SELECT count(id) as COUNT, attachments FROM tasks WHERE id=? and created_by=?",
                 [taskdata.id, rr.id],
                 (e, r) => {
-                  console.log(e, r);
                   if (r.COUNT > 0) {
+                    var prevAttachments = r.attachments.split(",");
                     db.run(SQL, (err, row) => {
-                      console.log(err, row);
                       if (err) {
                         output.error = err.message;
                         output.task = {
@@ -185,6 +234,9 @@ class Task {
                       resolve({
                         success: "Task Updated",
                         task: taskdata,
+                        tobedeleted: prevAttachments.filter(
+                          (e) => !taskdata.attachments.includes(e)
+                        ),
                       });
                     });
                   } else {
