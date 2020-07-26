@@ -201,6 +201,7 @@ class Task {
         updates.push(`${key}='${taskdata[key]}'`);
       }
     }
+    console.log(updates);
     var SQL =
       "UPDATE tasks SET " + updates.join(", ") + " WHERE id=" + taskdata.id;
     return new Promise((resolve, reject) => {

@@ -159,6 +159,7 @@ route.patch(
             fs.unlinkSync(file);
           }
         }
+        delete task.tobedeleted;
         res.json(task);
       })
       .catch((err) => {
