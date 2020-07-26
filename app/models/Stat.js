@@ -77,7 +77,6 @@ class Stat {
   }
 
   static get(req) {
-    console.log(req);
     return new Promise((resolve, reject) => {
       Stat.checkBy({
         sql: "SELECT * FROM students WHERE key='" + req.key + "'",

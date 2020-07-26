@@ -135,7 +135,6 @@ route.post(
       attachments.push("/uploads/img/submissions/" + file.filename);
     }
     attachments = attachments.join(",");
-    console.log(attachments);
     var subdata = {
       id: req.params.TASKID,
       key: req.params.KEY,
@@ -249,7 +248,6 @@ route2.put("/:KEY/:TASKID/:SUBID", (req, res) => {
         });
       })
       .catch((err) => {
-        console.log(details);
         res.json(err);
       });
   } else {

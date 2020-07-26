@@ -120,7 +120,6 @@ user.get("/", (req, res) => {
   res.send(out);
 });
 user.post("/getaccess", (req, res) => {
-  console.log(req.body);
   User.login(req.body)
     .then((out) => {
       res.json(out);

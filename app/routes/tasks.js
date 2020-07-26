@@ -195,7 +195,6 @@ route2.use(jwtCheck);
 route2.get("/:KEY", (req, res) => {
   Task.get({ key: req.params.KEY, student: true })
     .then((task) => {
-      console.log(task);
       for (var t of task) {
         var files = [];
         if (t.attachments != "") {
