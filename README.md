@@ -31,6 +31,7 @@ user1: cloudy@IDONTKNOW [type: instructor]
 
 ## Database Choice
 
-SQLite:
-_ Its lightweight and easy to setup.
-_ SQLite is serves as a conventional, table-oriented relational database. with just one file
+#### SQLite:
+
+> * Its lightweight and easy to setup.
+> * SQLite is serves as a conventional, table-oriented relational database. with just one file
