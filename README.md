@@ -28,3 +28,9 @@ EXAMPLE_USERS ( 2 OF THEM )
 user0: jonas@ILOVEMARTHA [type: student]
 user1: cloudy@IDONTKNOW [type: instructor]
 ```
+
+## Database Choice
+
+SQLite:
+_ Its lightweight and easy to setup.
+_ SQLite is serves as a conventional, table-oriented relational database. with just one file
