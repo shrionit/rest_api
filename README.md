@@ -34,4 +34,4 @@ user1: cloudy@IDONTKNOW [type: instructor]
 #### SQLite:
 
 > * Its lightweight and easy to setup.
-> * SQLite is serves as a conventional, table-oriented relational database. with just one file
+> * SQLite serves as a conventional, table-oriented relational database. with just one file
